@@ -182,7 +182,6 @@ void loop() {
   while((I2I1>TA_Max || I2I1<TA_Min || I4I3>TA_Max || I4I3<TA_Min) && enoughLight()){
     step_x();
     step_y();
-    delay(t);
     evaluate_x();
     evaluate_y();
   }
