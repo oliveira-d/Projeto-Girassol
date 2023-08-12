@@ -111,38 +111,34 @@ void evaluate_y() {
 }
 
 void step_x() {
-      
-      if (I2I1<TA_Min && P1<180){
-        P1=P1+1;
-        stepper_x.step(-1);
-      }
     
-      else if (I2I1>TA_Max && P1>0){
-        P1=P1-1;
-        stepper_x.step(1);
-      }
-    
-      else{}
+  if (I2I1<TA_Min && P1<180){
+    P1=P1+1;
+    stepper_x.step(-1);
+  }
+  else if (I2I1>TA_Max && P1>0){
+    P1=P1-1;
+    stepper_x.step(1);
+  }
+
 }
 
 void step_y() {
-      
-      if (I4I3<TA_Min && P2<180){
-        P2=P2+1;
-        stepper_y.step(-1);
-      }
-    
-      else if (I4I3>TA_Max && P2>0){
-        P2=P2-1;
-        stepper_y.step(1);
-      }
-   
-      else{}
+
+  if (I4I3<TA_Min && P2<180){
+    P2=P2+1;
+    stepper_y.step(-1);
+  }
+  else if (I4I3>TA_Max && P2>0){
+    P2=P2-1;
+    stepper_y.step(1);
+  }
+
 }
 
 void sleep_x() {
-    stepper_x.step(P1-90);
-    P1=90;
+  stepper_x.step(P1-90);
+  P1=90;
 }
 
 void sleep_y() {
@@ -163,10 +159,10 @@ void wait(int minutos){
 void loop() {
 
   while(niteMode){
-	  evaluate_x();
-	  evaluate_y();
-	  if (enoughLight()){
-    	niteMode=false;
+    evaluate_x();
+    evaluate_y();
+    if (enoughLight()){
+      niteMode=false;
     }
     else {
       wait(niteInterval);
@@ -191,4 +187,5 @@ void loop() {
     sleep_y();
     niteMode=true;
   }
+
 }

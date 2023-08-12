@@ -97,8 +97,8 @@ void evaluate_x() {
 void evaluate_y() {
    read3=analogRead(3);
    read4=analogRead(4);
-   R3=R0*(1024-read3)/(read3+1);
-   R4=R0*(1024-read4)/(read4+1);
+   R3=R0*(1023.01-read3)/(read3+0.01);
+   R4=R0*(1023.01-read4)/(read4+0.01);
    // descomentar linha(s) abaixo para observar os valores das resistências no Serial Monitor
    // Serial.print("R3 = ");Serial.println(R3);
    // Serial.print("R4 = ");Serial.println(R4);
@@ -113,62 +113,62 @@ void evaluate_y() {
 
 void stepservo_x() {
       
-      if (I2I1<TA_Min && P1<180){
-        P1=P1+1;
-        servo_x.write(P1);
-      }
-    
-      else if (I2I1>TA_Max && P1>0){
-        P1=P1-1;
-        servo_x.write(P1);
-      }
-    
-      else{}
+  if (I2I1<TA_Min && P1<180){
+    P1=P1+1;
+    servo_x.write(P1);
+  }
+
+  else if (I2I1>TA_Max && P1>0){
+    P1=P1-1;
+    servo_x.write(P1);
+  }
+
 }
 
 void stepservo_y() {
       
-      if (I4I3<TA_Min && P2<180){
-        P2=P2+1;
-        servo_y.write(P2);
-      }
-    
-      else if (I4I3>TA_Max && P2>0){
-        P2=P2-1;
-        servo_y.write(P2);
-      }
-   
-      else{}
+  if (I4I3<TA_Min && P2<180){
+    P2=P2+1;
+    servo_y.write(P2);
+  }
+
+  else if (I4I3>TA_Max && P2>0){
+    P2=P2-1;
+    servo_y.write(P2);
+  }
+ 
 }
 
 void sleep_x() {
     
-    while (P1<90){
-      P1=P1+1;
-      servo_x.write(P1);
-      delay(t);
-    }
-    
-    while (P1>90){
-      P1=P1-1;
-      servo_x.write(P1);
-      delay(t);
-    }
+  while (P1<90){
+    P1=P1+1;
+    servo_x.write(P1);
+    delay(t);
+  }
+  
+  while (P1>90){
+    P1=P1-1;
+    servo_x.write(P1);
+    delay(t);
+  }
+
 }
 
 void sleep_y() {
     
-    while (P2<90){
-      P2=P2+1;
-      servo_y.write(P2);
-      delay(t);
-    }
-  
-    while (P2>90){
-      P2=P2-1;
-      servo_y.write(P2);
-      delay(t);   
-    }
+  while (P2<90){
+    P2=P2+1;
+    servo_y.write(P2);
+    delay(t);
+  }
+
+  while (P2>90){
+    P2=P2-1;
+    servo_y.write(P2);
+    delay(t);   
+  }
+
 }
 
 bool enoughLight(){
@@ -184,10 +184,10 @@ void wait(int minutos){
 void loop() {
 
   while(niteMode){
-	  evaluate_x();
-	  evaluate_y();
-	  if (enoughLight()){
-    	niteMode=false;
+    evaluate_x();
+    evaluate_y();
+    if (enoughLight()){
+      niteMode=false;
     }
     else {
       wait(niteInterval);
@@ -213,4 +213,5 @@ void loop() {
     sleep_y();
     niteMode=true;
   }
+
 }
