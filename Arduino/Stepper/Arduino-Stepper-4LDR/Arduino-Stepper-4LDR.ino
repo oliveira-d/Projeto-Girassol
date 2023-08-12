@@ -1,12 +1,15 @@
 // Projeto Girassol - servomotor
 // circuito de leitura de voltagem: 5V - Resistência variável (Rx) - Resistência de referencia (R0 = 1000 Ohms) - GND
 
-#include <Servo.h>
+#include <Stepper.h>
 
-Servo servo_x;
-Servo servo_y;
+// altere isso para ficar de acordo com a quantidade de passos por volta do seu motor de passo
+const int stepsPerRevolution = 2048;
 
-//posição inicial
+Stepper stepper_x(stepsPerRevolution, 4, 5, 6, 7);
+Stepper stepper_y(stepsPerRevolution, 8, 9, 10, 11);
+
+// posição inicial
 int P1=90;
 int P2=90;
 
@@ -39,21 +42,17 @@ float TA_Max=1.05;
 // log(R)= -a*log(I)+log(b) onde a é positivo - valor obtido experimentalmente - R=b.I^(-a)
 float a=0.648;
 
-// intervalo entre os "passos" do servo motor (milissegundos)
-const int t=25;
-
 // intervalo entre medições à noite e ao dia (minutos) e elemento de iteração i
 const int niteInterval=30;
 const int dayInterval=1;
 int i;
 
 void setup() {
-  servo_x.attach(9);
-  servo_x.write(P1);
-
-  servo_y.attach(10);
-  servo_y.write(P2);
-
+  
+  // definir velocidade em RPM
+  stepper_x.setSpeed(10);
+  stepper_y.setSpeed(10);
+  
   pinMode(1,INPUT);
   pinMode(2,INPUT);
 
@@ -97,8 +96,8 @@ void evaluate_x() {
 void evaluate_y() {
    read3=analogRead(3);
    read4=analogRead(4);
-   R3=R0*(1023.01-read3)/(read3+0.01);
-   R4=R0*(1023.01-read4)/(read4+0.01);
+   R3=R0*(1024-read3)/(read3+1);
+   R4=R0*(1024-read4)/(read4+1);
    // descomentar linha(s) abaixo para observar os valores das resistências no Serial Monitor
    // Serial.print("R3 = ");Serial.println(R3);
    // Serial.print("R4 = ");Serial.println(R4);
@@ -111,64 +110,40 @@ void evaluate_y() {
    I4I3=pow(R3R4,(1/a));
 }
 
-void stepservo_x() {
-      
+void step_x() {
+    
   if (I2I1<TA_Min && P1<180){
     P1=P1+1;
-    servo_x.write(P1);
+    stepper_x.step(-1);
   }
-
   else if (I2I1>TA_Max && P1>0){
     P1=P1-1;
-    servo_x.write(P1);
+    stepper_x.step(1);
   }
 
 }
 
-void stepservo_y() {
-      
+void step_y() {
+
   if (I4I3<TA_Min && P2<180){
     P2=P2+1;
-    servo_y.write(P2);
+    stepper_y.step(-1);
   }
-
   else if (I4I3>TA_Max && P2>0){
     P2=P2-1;
-    servo_y.write(P2);
+    stepper_y.step(1);
   }
- 
+
 }
 
 void sleep_x() {
-    
-  while (P1<90){
-    P1=P1+1;
-    servo_x.write(P1);
-    delay(t);
-  }
-  
-  while (P1>90){
-    P1=P1-1;
-    servo_x.write(P1);
-    delay(t);
-  }
-
+  stepper_x.step(P1-90);
+  P1=90;
 }
 
 void sleep_y() {
-    
-  while (P2<90){
-    P2=P2+1;
-    servo_y.write(P2);
-    delay(t);
-  }
-
-  while (P2>90){
-    P2=P2-1;
-    servo_y.write(P2);
-    delay(t);   
-  }
-
+  stepper_y.step(P2-90);
+  P2=90;
 }
 
 bool enoughLight(){
@@ -201,9 +176,8 @@ void loop() {
   }
 
   while((I2I1>TA_Max || I2I1<TA_Min || I4I3>TA_Max || I4I3<TA_Min) && enoughLight()){
-    stepservo_x();
-    stepservo_y();
-    delay(t);
+    step_x();
+    step_y();
     evaluate_x();
     evaluate_y();
   }

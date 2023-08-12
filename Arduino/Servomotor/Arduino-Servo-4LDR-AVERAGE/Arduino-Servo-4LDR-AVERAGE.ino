@@ -18,12 +18,12 @@ bool niteMode=true;
 // Valores de leitura dos resistores responsáveis pela movimentação no eixo X - de frente para o motor: R1 - Eixo X - R2
 float read1,read2;
 float R1,R2;
-float R1R2,I2I1;
+float R1R2,IXB_IXA;
 
 // Valores de leitura dos resistores responsáveis pela movimentação no eixo X - de frente para o motor: R3 - Eixo Y - R4
 float read3,read4;
 float R3,R4;
-float R3R4,I4I3;
+float R3R4,IYB_IYA;
 
 // resistência de referência (em Ohms)
 float R0=1000;
@@ -79,84 +79,80 @@ void calibrate(int i){
   }
 }
 
-void evaluate_x() {
+void readResistors() {
   read1=analogRead(1);
   read2=analogRead(2);
-  R1=R0*(1023.01-read1)/(read1+0.01); // 1024 em vez de 1023 para evitar que o valor seja 0; read+0.01 para evitar denominador igual a 0;
+  read3=analogRead(3);
+  read4=analogRead(4);
+  R1=R0*(1023.01-read1)/(read1+0.01);
   R2=R0*(1023.01-read2)/(read2+0.01);
+  R3=R0*(1023.01-read3)/(read3+0.01);
+  R4=R0*(1023.01-read4)/(read4+0.01);
+}
+
+void evaluate_x() {
   // descomentar linha(s) abaixo para observar os valores das resistências no Serial Monitor
   // Serial.print("R1 = ");Serial.println(R1);
   // Serial.print("R2 = ");Serial.println(R2);
   calibrate(2);
   // descomentar linha(s) abaixo para observar os valores das resistências no Serial Monitor
   // Serial.print("R2_cal = ");Serial.println(R2);
-  R1R2=R1/R2;
-  I2I1=pow(R1R2,(1/a));
+  R1R2=(R1+R4)/(R2+R3);
+  IXB_IXA=pow(R1R2,(1/a));
 }
 
 void evaluate_y() {
-   read3=analogRead(3);
-   read4=analogRead(4);
-   R3=R0*(1023.01-read3)/(read3+0.01);
-   R4=R0*(1023.01-read4)/(read4+0.01);
-   // descomentar linha(s) abaixo para observar os valores das resistências no Serial Monitor
-   // Serial.print("R3 = ");Serial.println(R3);
-   // Serial.print("R4 = ");Serial.println(R4);
-   calibrate(3);
-   calibrate(4);
-   // Serial.print("R3_cal = ");Serial.println(R3);
-   // Serial.print("R4_cal = ");Serial.println(R4);
-   // Serial.println();
-   R3R4=R3/R4;
-   I4I3=pow(R3R4,(1/a));
+  // descomentar linha(s) abaixo para observar os valores das resistências no Serial Monitor
+  // Serial.print("R3 = ");Serial.println(R3);
+  // Serial.print("R4 = ");Serial.println(R4);
+  calibrate(3);
+  calibrate(4);
+  // Serial.print("R3_cal = ");Serial.println(R3);
+  // Serial.print("R4_cal = ");Serial.println(R4);
+  // Serial.println();
+  R3R4=(R3+R4)/(R1+R2);
+  IYB_IYA=pow(R3R4,(1/a));
 }
 
 void stepservo_x() {
-      
-  if (I2I1<TA_Min && P1<180){
+  if (IXB_IXA<TA_Min && P1<180){
     P1=P1+1;
     servo_x.write(P1);
   }
-
-  else if (I2I1>TA_Max && P1>0){
+  else if (IXB_IXA>TA_Max && P1>0){
     P1=P1-1;
     servo_x.write(P1);
   }
-
 }
 
 void stepservo_y() {
-      
-  if (I4I3<TA_Min && P2<180){
+  if (IYB_IYA<TA_Min && P2<180){
     P2=P2+1;
     servo_y.write(P2);
   }
-
-  else if (I4I3>TA_Max && P2>0){
+  else if (IYB_IYA>TA_Max && P2>0){
     P2=P2-1;
     servo_y.write(P2);
   }
- 
 }
 
 void sleep_x() {
     
-  while (P1<90){
-    P1=P1+1;
-    servo_x.write(P1);
-    delay(t);
-  }
-  
-  while (P1>90){
-    P1=P1-1;
-    servo_x.write(P1);
-    delay(t);
-  }
-
+    while (P1<90){
+      P1=P1+1;
+      servo_x.write(P1);
+      delay(t);
+    }
+    
+    while (P1>90){
+      P1=P1-1;
+      servo_x.write(P1);
+      delay(t);
+    }
 }
 
 void sleep_y() {
-    
+
   while (P2<90){
     P2=P2+1;
     servo_y.write(P2);
@@ -172,7 +168,7 @@ void sleep_y() {
 }
 
 bool enoughLight(){
-  return ((R1+R2)<doubleR_nite && (R3+R4)<doubleR_nite);
+  return ((R1+R2+R3+R4)<(2*doubleR_nite));
 }
 
 void wait(int minutos){
@@ -182,8 +178,9 @@ void wait(int minutos){
 }
 
 void loop() {
-
+  
   while(niteMode){
+    readResistors();
     evaluate_x();
     evaluate_y();
     if (enoughLight()){
@@ -194,16 +191,18 @@ void loop() {
     }
   }
 
-  while (I2I1<TV_Max && I2I1>TV_Min && I4I3<TV_Max && I4I3>TV_Min){
+  while (IXB_IXA<TV_Max && IXB_IXA>TV_Min && IYB_IYA<TV_Max && IYB_IYA>TV_Min){
     wait(dayInterval);
+    readResistors();
     evaluate_x();
     evaluate_y();
   }
 
-  while((I2I1>TA_Max || I2I1<TA_Min || I4I3>TA_Max || I4I3<TA_Min) && enoughLight()){
+  while((IXB_IXA>TA_Max || IXB_IXA<TA_Min || IYB_IYA>TA_Max || IYB_IYA<TA_Min) && enoughLight()){
     stepservo_x();
     stepservo_y();
     delay(t);
+    readResistors();
     evaluate_x();
     evaluate_y();
   }
