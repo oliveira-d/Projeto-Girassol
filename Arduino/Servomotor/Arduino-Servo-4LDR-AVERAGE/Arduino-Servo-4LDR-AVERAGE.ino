@@ -7,8 +7,8 @@ Servo servo_x;
 Servo servo_y;
 
 //posição inicial
-int P1=90;
-int P2=90;
+int PX=90;
+int PY=90;
 
 /* dobro da leitura típica do fotorresistor à noite 
 (para que o arduino nao precise fazer mais uma operação ao comparar a leitura média com a leitura noturna na função enoughLight() definida abaixo */
@@ -49,10 +49,10 @@ int i;
 
 void setup() {
   servo_x.attach(9);
-  servo_x.write(P1);
+  servo_x.write(PX);
 
   servo_y.attach(10);
-  servo_y.write(P2);
+  servo_y.write(PY);
 
   pinMode(1,INPUT);
   pinMode(2,INPUT);
@@ -115,53 +115,53 @@ void evaluate_y() {
 }
 
 void stepservo_x() {
-  if (IXB_IXA<TA_Min && P1<180){
-    P1=P1+1;
-    servo_x.write(P1);
+  if (IXB_IXA<TA_Min && PX<180){
+    PX=PX+1;
+    servo_x.write(PX);
   }
-  else if (IXB_IXA>TA_Max && P1>0){
-    P1=P1-1;
-    servo_x.write(P1);
+  else if (IXB_IXA>TA_Max && PX>0){
+    PX=PX-1;
+    servo_x.write(PX);
   }
 }
 
 void stepservo_y() {
-  if (IYB_IYA<TA_Min && P2<180){
-    P2=P2+1;
-    servo_y.write(P2);
+  if (IYB_IYA<TA_Min && PY<180){
+    PY=PY+1;
+    servo_y.write(PY);
   }
-  else if (IYB_IYA>TA_Max && P2>0){
-    P2=P2-1;
-    servo_y.write(P2);
+  else if (IYB_IYA>TA_Max && PY>0){
+    PY=PY-1;
+    servo_y.write(PY);
   }
 }
 
 void sleep_x() {
     
-    while (P1<90){
-      P1=P1+1;
-      servo_x.write(P1);
+    while (PX<90){
+      PX=PX+1;
+      servo_x.write(PX);
       delay(t);
     }
     
-    while (P1>90){
-      P1=P1-1;
-      servo_x.write(P1);
+    while (PX>90){
+      PX=PX-1;
+      servo_x.write(PX);
       delay(t);
     }
 }
 
 void sleep_y() {
 
-  while (P2<90){
-    P2=P2+1;
-    servo_y.write(P2);
+  while (PY<90){
+    PY=PY+1;
+    servo_y.write(PY);
     delay(t);
   }
 
-  while (P2>90){
-    P2=P2-1;
-    servo_y.write(P2);
+  while (PY>90){
+    PY=PY-1;
+    servo_y.write(PY);
     delay(t);   
   }
 

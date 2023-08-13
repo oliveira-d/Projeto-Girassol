@@ -10,8 +10,8 @@ Stepper stepper_x(stepsPerRevolution, 4, 5, 6, 7);
 Stepper stepper_y(stepsPerRevolution, 8, 9, 10, 11);
 
 // posição inicial
-int P1=90;
-int P2=90;
+int PX=90;
+int PY=90;
 
 /* dobro da leitura típica do fotorresistor à noite 
 (para que o arduino nao precise fazer mais uma operação ao comparar a leitura média com a leitura noturna na função enoughLight() definida abaixo */
@@ -112,12 +112,12 @@ void evaluate_y() {
 
 void step_x() {
     
-  if (I2I1<TA_Min && P1<180){
-    P1=P1+1;
+  if (I2I1<TA_Min && PX<180){
+    PX=PX+1;
     stepper_x.step(-1);
   }
-  else if (I2I1>TA_Max && P1>0){
-    P1=P1-1;
+  else if (I2I1>TA_Max && PX>0){
+    PX=PX-1;
     stepper_x.step(1);
   }
 
@@ -125,25 +125,25 @@ void step_x() {
 
 void step_y() {
 
-  if (I4I3<TA_Min && P2<180){
-    P2=P2+1;
+  if (I4I3<TA_Min && PY<180){
+    PY=PY+1;
     stepper_y.step(-1);
   }
-  else if (I4I3>TA_Max && P2>0){
-    P2=P2-1;
+  else if (I4I3>TA_Max && PY>0){
+    PY=PY-1;
     stepper_y.step(1);
   }
 
 }
 
 void sleep_x() {
-  stepper_x.step(P1-90);
-  P1=90;
+  stepper_x.step(PX-90);
+  PX=90;
 }
 
 void sleep_y() {
-  stepper_y.step(P2-90);
-  P2=90;
+  stepper_y.step(PY-90);
+  PY=90;
 }
 
 bool enoughLight(){
